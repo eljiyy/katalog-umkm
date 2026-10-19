@@ -80,3 +80,4 @@ Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yan
 **US-08 Tambah produk (harus terkunci login)**
 **US-09 Ubah produk (harus terkunci login)**
 **US-10 Hapus produk (harus terkunci login)**
+**US-11 Filter kategori atau pencarian**

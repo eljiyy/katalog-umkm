@@ -252,3 +252,44 @@ export async function ubahProduk(prevState, formData) {
     };
   }
 }
+
+export async function hapusProduk(idOrFormData) {
+  let supabase;
+  try {
+    const res = await periksaAdminLogin();
+    supabase = res.supabase;
+  } catch {
+    redirect("/admin/login");
+  }
+
+  const id =
+    idOrFormData instanceof FormData
+      ? idOrFormData.get("id")?.toString()?.trim()
+      : idOrFormData?.toString()?.trim();
+
+  if (!id) {
+    return { error: "ID produk tidak valid." };
+  }
+
+  try {
+    let { error } = await supabase.from("produk").delete().eq("id", id);
+
+    if (error && (error.code === "42P01" || error.message?.includes("does not exist"))) {
+      const fallback = await supabase.from("products").delete().eq("id", id);
+      error = fallback.error;
+    }
+
+    if (error) {
+      return { error: "Gagal menghapus produk: " + error.message };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+
+    return { success: "Produk berhasil dihapus." };
+  } catch (err) {
+    return {
+      error: "Terjadi kesalahan saat menghapus produk: " + (err.message || "Gagal menghapus"),
+    };
+  }
+}

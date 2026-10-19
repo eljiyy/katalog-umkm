@@ -22,6 +22,7 @@ export default function FormProduk({
           {state.success}
         </div>
       )}
+      {produk.id && <input type="hidden" name="id" defaultValue={produk.id} />}
       <Input label="Nama produk" name="nama" defaultValue={produk.nama} required />
       <Input
         label="Harga (Rp)"

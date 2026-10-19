@@ -175,3 +175,80 @@ export async function tambahProduk(prevState, formData) {
     };
   }
 }
+
+export async function ubahProduk(prevState, formData) {
+  const data = formData instanceof FormData ? formData : prevState;
+
+  let supabase;
+  try {
+    const res = await periksaAdminLogin();
+    supabase = res.supabase;
+  } catch {
+    redirect("/admin/login");
+  }
+
+  const id = data?.get?.("id")?.toString()?.trim();
+  const nama = data?.get?.("nama")?.toString()?.trim();
+  const hargaStr = data?.get?.("harga")?.toString()?.trim();
+  const kategori = data?.get?.("kategori")?.toString()?.trim() || null;
+  const fotoUrl = data?.get?.("foto_url")?.toString()?.trim() || null;
+  const deskripsi = data?.get?.("deskripsi")?.toString()?.trim() || null;
+
+  if (!id) {
+    return { error: "ID produk tidak valid." };
+  }
+
+  if (!nama) {
+    return { error: "Nama produk wajib diisi." };
+  }
+
+  if (!hargaStr) {
+    return { error: "Harga produk wajib diisi." };
+  }
+
+  const harga = parseInt(hargaStr, 10);
+  if (isNaN(harga) || harga < 0) {
+    return { error: "Harga produk harus berupa angka dan tidak boleh negatif." };
+  }
+
+  try {
+    let { error } = await supabase
+      .from("produk")
+      .update({
+        nama,
+        harga,
+        kategori,
+        foto_url: fotoUrl,
+        deskripsi,
+      })
+      .eq("id", id);
+
+    if (error && (error.code === "42P01" || error.message?.includes("does not exist"))) {
+      const fallback = await supabase
+        .from("products")
+        .update({
+          nama,
+          harga,
+          kategori,
+          foto_url: fotoUrl,
+          deskripsi,
+        })
+        .eq("id", id);
+      error = fallback.error;
+    }
+
+    if (error) {
+      return { error: "Gagal memperbarui produk: " + error.message };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath(`/produk/${id}`);
+
+    return { success: "Produk berhasil diperbarui! Mengalihkan ke halaman admin..." };
+  } catch (err) {
+    return {
+      error: "Terjadi kesalahan saat memperbarui produk: " + (err.message || "Gagal memperbarui"),
+    };
+  }
+}

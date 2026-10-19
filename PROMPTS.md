@@ -77,3 +77,6 @@ Setelah login, halaman admin terbuka normal.
 
 Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yang kamu kerjakan.
 **US-07 List produk di halaman admin dari database**
+**US-08 Tambah produk (harus terkunci login)**
+**US-09 Ubah produk (harus terkunci login)**
+**US-10 Hapus produk (harus terkunci login)**

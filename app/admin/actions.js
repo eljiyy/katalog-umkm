@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { buatKoneksiAdmin } from "@/lib/supabase/server";
 
 /**
@@ -106,6 +107,71 @@ export async function gantiPassword(prevState, formData) {
   } catch (err) {
     return {
       error: err.message || "Gagal mengganti password.",
+    };
+  }
+}
+
+export async function tambahProduk(prevState, formData) {
+  const data = formData instanceof FormData ? formData : prevState;
+
+  let supabase;
+  try {
+    const res = await periksaAdminLogin();
+    supabase = res.supabase;
+  } catch {
+    redirect("/admin/login");
+  }
+
+  const nama = data?.get?.("nama")?.toString()?.trim();
+  const hargaStr = data?.get?.("harga")?.toString()?.trim();
+  const kategori = data?.get?.("kategori")?.toString()?.trim() || null;
+  const fotoUrl = data?.get?.("foto_url")?.toString()?.trim() || null;
+  const deskripsi = data?.get?.("deskripsi")?.toString()?.trim() || null;
+
+  if (!nama) {
+    return { error: "Nama produk wajib diisi." };
+  }
+
+  if (!hargaStr) {
+    return { error: "Harga produk wajib diisi." };
+  }
+
+  const harga = parseInt(hargaStr, 10);
+  if (isNaN(harga) || harga < 0) {
+    return { error: "Harga produk harus berupa angka dan tidak boleh negatif." };
+  }
+
+  try {
+    let { error } = await supabase.from("produk").insert({
+      nama,
+      harga,
+      kategori,
+      foto_url: fotoUrl,
+      deskripsi,
+    });
+
+    if (error && (error.code === "42P01" || error.message?.includes("does not exist"))) {
+      const fallback = await supabase.from("products").insert({
+        nama,
+        harga,
+        kategori,
+        foto_url: fotoUrl,
+        deskripsi,
+      });
+      error = fallback.error;
+    }
+
+    if (error) {
+      return { error: "Gagal menyimpan produk: " + error.message };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+
+    return { success: "Produk berhasil ditambahkan! Mengalihkan ke halaman admin..." };
+  } catch (err) {
+    return {
+      error: "Terjadi kesalahan saat menyimpan produk: " + (err.message || "Gagal menyimpan"),
     };
   }
 }

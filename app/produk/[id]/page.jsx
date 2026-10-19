@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import TombolWhatsApp from "@/components/TombolWhatsApp";
+import PemesananProduk from "@/components/PemesananProduk";
 import { formatRupiah } from "@/lib/format";
 import { buatKoneksiServer } from "@/lib/supabase/server";
 
@@ -13,11 +13,21 @@ export default async function HalamanDetailProduk({ params }) {
 
   try {
     const supabase = buatKoneksiServer();
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("produk")
       .select("*")
       .eq("id", id)
       .maybeSingle();
+
+    if (error && (error.code === "42P01" || error.message?.includes("does not exist"))) {
+      const fallback = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      data = fallback.data;
+      error = fallback.error;
+    }
 
     if (!error && data) {
       produk = data;
@@ -54,7 +64,7 @@ export default async function HalamanDetailProduk({ params }) {
         <p className="max-w-prose leading-relaxed text-teks-lembut">
           {produk.deskripsi}
         </p>
-        <TombolWhatsApp produk={produk} />
+        <PemesananProduk produk={produk} />
       </div>
     </article>
   );

@@ -83,4 +83,3 @@ Tambahkan bagian baru untuk setiap error yang kamu perbaiki atau fitur bonus yan
 **US-11 Filter kategori atau pencarian**
 **US-12 Pilih jumlah atau varian**
 **US-13 Bisa di-install di HP (PWA)**
-**US-14 Deskripsi produk dibuat AI**

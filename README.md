@@ -79,3 +79,9 @@ Urutan yang disarankan: US-01, US-02, US-03, US-04, US-05, US-06, lalu fitur bon
 - **Link aplikasi:https://katalog-umkm-sepia-six.vercel.app/**
 - **Fitur bonus yang dikerjakan:**
 **-US-07 List produk di halaman admin dari database**
+**US-08 Tambah produk (harus terkunci login)**
+**US-09 Ubah produk (harus terkunci login)**
+**US-10 Hapus produk (harus terkunci login)**
+**US-11 Filter kategori atau pencarian**
+**US-12 Pilih jumlah atau varian**
+**US-13 Bisa di-install di HP (PWA)**

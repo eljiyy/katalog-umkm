@@ -3,6 +3,24 @@
 import { redirect } from "next/navigation";
 import { buatKoneksiAdmin } from "@/lib/supabase/server";
 
+/**
+ * Memeriksa apakah admin sudah login di sisi server.
+ * Digunakan oleh semua Server Action yang mengubah data.
+ */
+export async function periksaAdminLogin() {
+  const supabase = await buatKoneksiAdmin();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    throw new Error("Kamu harus login terlebih dahulu.");
+  }
+
+  return { supabase, user };
+}
+
 export async function loginAdmin(prevState, formData) {
   const data = formData instanceof FormData ? formData : prevState;
 
@@ -74,15 +92,7 @@ export async function gantiPassword(prevState, formData) {
   }
 
   try {
-    const supabase = await buatKoneksiAdmin();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return { error: "Kamu harus login terlebih dahulu untuk mengganti password." };
-    }
+    const { supabase } = await periksaAdminLogin();
 
     const { error } = await supabase.auth.updateUser({
       password: passwordBaru,
@@ -95,7 +105,7 @@ export async function gantiPassword(prevState, formData) {
     return { success: "Password berhasil diganti!" };
   } catch (err) {
     return {
-      error: "Terjadi kesalahan: " + (err.message || "Gagal mengganti password."),
+      error: err.message || "Gagal mengganti password.",
     };
   }
 }
